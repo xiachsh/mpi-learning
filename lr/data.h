@@ -10,7 +10,7 @@
 
 #define MAX_DATA_BUF 16 * 1024 * 1024
 //#define MAX_RETURN_POINT 1024 * 1024
-#define MAX_RETURN_POINT  1024
+#define MAX_RETURN_POINT  5120
 
 typedef struct _point {
 	float x;

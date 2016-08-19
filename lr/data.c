@@ -57,8 +57,8 @@ Point * readDataFromFile(const char * path,int * ptCnt)
 		}
 	}
         *ptCnt = pointCnt;
-
 	free(buff);
+        close(fd);
 	
 	return retPoint;
 }

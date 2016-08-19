@@ -20,7 +20,7 @@ int main(int argc,char **argv)
 {
 
         int size,rank;
-        int x = 0;
+        int pointCnt = 0;
         Point * pnts = NULL;
     
         Point * recvBuff = NULL;
@@ -36,23 +36,55 @@ int main(int argc,char **argv)
         }
 
         if (rank == 0)
-             pnts = readDataFromFile(argv[1],&x);
+             pnts = readDataFromFile(argv[1],&pointCnt);
         else 
              pnts = malloc(sizeof(Point)  * MAX_RETURN_POINT );
-        recvBuff = malloc(sizeof(Point) * MAX_RETURN_POINT * size);
-        MPI_Bcast(pnts,sizeof(Point) * MAX_RETURN_POINT,MPI_CHAR,0,MPI_COMM_WORLD);
+        recvBuff = malloc(sizeof(Point) * MAX_RETURN_POINT);
+        bzero(recvBuff,sizeof(Point) * MAX_RETURN_POINT);
+        int sendSize = sizeof(Point) * MAX_RETURN_POINT / size;
+        MPI_Scatter(pnts,sendSize,MPI_CHAR,recvBuff,sendSize,MPI_CHAR,0,MPI_COMM_WORLD);
+        
+        long double sumX = 0.0f, sumY = 0.0f, sumXMultiX = 0.0f,sumXMultiY = 0.0f;
+        
+        long double * resultBuff = malloc(sizeof(long double) * 4);
+        long double * recvRstBuff = malloc(sizeof(long double) * 4 * size);
 
-
-        if (rank == size-1) {
              
             int i = 0;
             for (i=0;i<MAX_RETURN_POINT;i++) {
-                fprintf(stdout,"%f\t%f\n",pnts[i].x,pnts[i].y);
+                sumX += recvBuff[i].x;
+                sumY += recvBuff[i].y;
+                sumXMultiX += ((recvBuff[i].x) * (recvBuff[i].x));
+                sumXMultiY += ((recvBuff[i].x) * (recvBuff[i].y));
             }
-        }
     
+        resultBuff[0] = sumX;
+        resultBuff[1] = sumY;
+        resultBuff[2] = sumXMultiX;
+        resultBuff[3] = sumXMultiY;
          
 
+        MPI_Gather(resultBuff,4,MPI_LONG_DOUBLE,recvRstBuff,4,MPI_LONG_DOUBLE,0,MPI_COMM_WORLD);
+        long double slop = 0.0f;
+        long double aix = 0.0f;
+        sumX = 0.0f; sumY = 0.0f; sumXMultiX = 0.0f;sumXMultiY = 0.0f;
+        if (rank == 0) {
+            int y = 0;
+            for (;y<4;y++) {
+                sumX += recvRstBuff[4*y+0];
+                sumY += recvRstBuff[4*y+1];
+                sumXMultiX += recvRstBuff[4*y+2];
+                sumXMultiY += recvRstBuff[4*y+3];
+            }
+
+            slop = (sumXMultiY - sumY*sumX)  / (sumXMultiX - (sumX*sumX));
+            aix = ( sumY - (slop * sumX) ) / pointCnt;
+
+            printf("y = %4.10Le + %4.10Le * x\n",aix,slop);
+        }
+
+        free(resultBuff);
+        free(recvRstBuff);
         free(pnts);
         free(recvBuff);
         MPI_Finalize();
