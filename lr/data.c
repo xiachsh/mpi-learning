@@ -8,7 +8,7 @@
 
 #include "data.h"
 
-Point * readDataFromFile(const char * path)
+Point * readDataFromFile(const char * path,int * ptCnt)
 {
 	int fd = open(path,O_RDONLY);
 	char * buff = malloc(sizeof(char) * MAX_DATA_BUF);
@@ -36,20 +36,30 @@ Point * readDataFromFile(const char * path)
 		read(fd,buff,MAX_DATA_BUF);
 		char * tmpBuff = buff;
 		for (;;tmpBuff=NULL) {
+                        float x,y;
 			char * token;
 			char * savePtr1;
 			token = strtok_r(tmpBuff," \t\n",&savePtr1);
 			char * subtoken, *savePtr2;
-			
 			if (token == NULL)	
 				break;
-			printf("%s\n",token);
+
+                        char * _str =  token;
+                        subtoken = strtok_r(_str,",",&savePtr2);
+                        x = atof(subtoken+1);
+                        
+                        _str = NULL;
+                        subtoken = strtok_r(_str,",",&savePtr2);
+                        y = atof(subtoken);
+    
+                        Point pnt = {x,y};
+                        retPoint[pointCnt++] = pnt;
 		}
 	}
+        *ptCnt = pointCnt;
 
 	free(buff);
-	free(retPoint);	
 	
-	return NULL;
+	return retPoint;
 }
 

@@ -9,7 +9,8 @@
 
 
 #define MAX_DATA_BUF 16 * 1024 * 1024
-#define MAX_RETURN_POINT 1024 * 1024
+//#define MAX_RETURN_POINT 1024 * 1024
+#define MAX_RETURN_POINT  1024
 
 typedef struct _point {
 	float x;
@@ -17,6 +18,6 @@ typedef struct _point {
 } Point;
 
 
-Point * readDataFromFile(const char * path);
+Point * readDataFromFile(const char * path,int *ptCnt);
 
 #endif 
