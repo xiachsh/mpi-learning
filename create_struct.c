@@ -3,6 +3,7 @@
 #include <stdlib.h>
 
 
+#pragma pack(1)
 #include <mpi.h>
 
 #define CHECK_MPI_ERR(x)  					\
@@ -46,6 +47,7 @@ int main()
 	disps[1] -= disps[0]; 
 	disps[0] = 0;
 	
+	printf("%d %d %d %d\n",disps[0],disps[1],disps[2],disps[3]);
 	
 	MPI_Type_create_struct(4,blocks,disps,types,&newtype);
 	MPI_Type_commit(&newtype);
