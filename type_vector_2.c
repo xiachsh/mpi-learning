@@ -61,9 +61,9 @@ int main(int argc,char **argv)
 	MPI_Type_vector(N,1,N,MPI_INT,&newtype);
 	MPI_Type_commit(&newtype);
 	
+	MPI_Bcast(&offset,1,MPI_INT,0,MPI_COMM_WORLD);
 
-	//some problem to fix
-	MPI_Bcast(A+offset,1,newtype,0,MPI_COMM_WORLD);
+	MPI_Bcast(&(A[0][offset]),1,newtype,0,MPI_COMM_WORLD);
 	if (rank == 1) 
 		print_matrix(A,N,N);
 
